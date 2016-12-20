@@ -6,7 +6,6 @@ import org.apache.zookeeper.KeeperException;
 import pl.allegro.tech.hermes.api.Subscription;
 import pl.allegro.tech.hermes.api.SubscriptionName;
 import pl.allegro.tech.hermes.common.exception.InternalProcessingException;
-import pl.allegro.tech.hermes.consumers.subscription.cache.SubscriptionsCache;
 
 import java.util.Optional;
 
@@ -19,22 +18,15 @@ public class SubscriptionAssignmentRegistry implements SubscriptionAssignmentAwa
     private final SubscriptionAssignmentCache subscriptionAssignmentCache;
 
     public SubscriptionAssignmentRegistry(CuratorFramework curator,
-                                          String path,
-                                          SubscriptionsCache subscriptionsCache,
+                                          SubscriptionAssignmentCache subscriptionAssignmentCache,
                                           SubscriptionAssignmentPathSerializer pathSerializer) {
         this.curator = curator;
         this.pathSerializer = pathSerializer;
-        this.subscriptionAssignmentCache =
-                new SubscriptionAssignmentCache(curator, path, subscriptionsCache, pathSerializer);
+        this.subscriptionAssignmentCache = subscriptionAssignmentCache;
     }
 
     public void start() throws Exception {
         subscriptionAssignmentCache.registerAssignementCallback(this);
-        subscriptionAssignmentCache.start();
-    }
-
-    public void stop() throws Exception {
-        subscriptionAssignmentCache.stop();
     }
 
     @Override

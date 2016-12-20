@@ -41,24 +41,27 @@ public class WorkTrackerTest extends ZookeeperBaseTest {
             groupRepository, topicRepository, subscriptionRepository
     );
 
+    private final SubscriptionAssignmentPathSerializer serializer = new SubscriptionAssignmentPathSerializer(basePath);
+
+    private final SubscriptionAssignmentCache subscriptionAssignmentCache =
+            new SubscriptionAssignmentCache(zookeeperClient, basePath, cache, serializer);
+
     private final SubscriptionAssignmentRegistry subscriptionAssignmentRegistry =
-            new SubscriptionAssignmentRegistry(zookeeperClient,
-                    basePath,
-                    cache,
-                    new SubscriptionAssignmentPathSerializer(basePath));
+            new SubscriptionAssignmentRegistry(zookeeperClient, subscriptionAssignmentCache, serializer);
 
     private final WorkTracker workTracker = new WorkTracker(supervisorId, subscriptionAssignmentRegistry);
 
     @Before
     public void before() throws Exception {
         notifyingCache.start();
+        subscriptionAssignmentCache.start();
         subscriptionAssignmentRegistry.start();
     }
 
     @After
     public void cleanup() throws Exception {
         notifyingCache.stop();
-        subscriptionAssignmentRegistry.stop();
+        subscriptionAssignmentCache.stop();
         deleteAllNodes();
     }
 
